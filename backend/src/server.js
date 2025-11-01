@@ -1,7 +1,6 @@
 import express from 'express'
-import dotenv from 'dotenv'
+import {ENV} from './utils/env.js';
 import cookieParser from 'cookie-parser'
-dotenv.config();
 import cors from 'cors';
 import path from 'path';
 import authRoutes from './routes/auth.route.js';
@@ -11,7 +10,7 @@ import { connectDB } from './utils/db.js';
 
 
 const app = express();
-const PORT = process.env.PORT || 8000;
+const PORT = ENV.PORT || 8000;
 
 
 //Public middlewares
@@ -22,7 +21,7 @@ app.use(cookieParser());
 
 
 const __dirname = path.resolve();
-if(process.env.NODE_ENV !== "production"){
+if(ENV.NODE_ENV !== "production"){
     app.use(cors());
 }
 
@@ -39,9 +38,9 @@ app.get('/',(req, res)=>{
 //Database connection
 connectDB()
  .then(() => {
-    app.listen(process.env.PORT, () => {
+    app.listen(ENV.PORT, () => {
       console.log(
-        `Server is running on port http://localhost:${process.env.PORT}`
+        `Server is running on port http://localhost:${ENV.PORT}`
       );
     });
   })
@@ -51,7 +50,7 @@ connectDB()
 
 
 //Make ready for deployment
-if(process.env.NODE_ENV === "production"){
+if(ENV.NODE_ENV === "production"){
     app.use(express.static(path.join(__dirname,"../frontend/dist")));
 
     app.get("*", (req, res)=>{
