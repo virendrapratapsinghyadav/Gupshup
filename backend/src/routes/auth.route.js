@@ -1,6 +1,7 @@
 import express from 'express';
-import { signUp, login, logOut } from '../controllers/auth.controller.js';
-
+import { signUp, login, logOut, updateProfile } from '../controllers/auth.controller.js';
+import { protectedRoute } from '../middlewares/auth.middleware.js';
+import { apiResponse } from '../utils/apiResponse.js';
 
 const router = express.Router();
 
@@ -8,7 +9,8 @@ const router = express.Router();
 router.post('/signup', signUp);
 router.post('/login', login);
 router.post('/logout', logOut);
+router.put('/update-profile', protectedRoute, updateProfile);
 
-
+router.get("/check", protectedRoute, (req, res)=>res.status(200).json(new apiResponse(200, req.savedUser, "User is authenticated")))
 
 export default router;

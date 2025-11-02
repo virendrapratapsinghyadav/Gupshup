@@ -2,9 +2,10 @@ import { sendWelcomeEmail } from "../emails/emailHandler.js";
 import { User } from "../models/User.model.js";
 import { apiError } from "../utils/apiError.js";
 import { apiResponse } from "../utils/apiResponse.js";
-import {ENV} from '../utils/env.js';
+import { ENV } from "../utils/env.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import cloudinary from "../utils/cloudinary.js";
 
 // Generate Tokens
 const generateTokens = (payload) => {
@@ -79,28 +80,25 @@ const signUp = async (req, res, next) => {
         savedUser.email,
         savedUser.fullName,
         ENV.CLIENT_URL
-
       );
     } catch (error) {
       throw new apiError(500, "failed to send email");
     }
 
-  return res.status(201).send(
-    new apiResponse(
-      201,
-      {
-        user: {
-          id: savedUser._id,
-          fullName: savedUser.fullName,
-          email: savedUser.email,
+    return res.status(201).send(
+      new apiResponse(
+        201,
+        {
+          user: {
+            id: savedUser._id,
+            fullName: savedUser.fullName,
+            email: savedUser.email,
+          },
         },
-      },
-      "Signup Successfully"
-    )
-  );
-  
-  } 
-  catch (error) {
+        "Signup Successfully"
+      )
+    );
+  } catch (error) {
     return next(new apiError(500, error.message || "SignUp failed"));
   }
 };
@@ -158,19 +156,11 @@ const login = async (req, res, next) => {
 //LogOut
 const logOut = async (req, res, next) => {
   try {
-    if (!req.user) {
-      return next(new apiError(401, "User not authenticated"));
-    }
-    await User.findByIdAndUpdate(req.user._id, {
-      $set: {
-        refreshToken: undefined,
-      },
-    });
-
     const options = {
       httpOnly: true,
       secure: ENV.NODE_ENV === "development" ? false : true,
       sameSite: "strict",
+      maxAge: 0,
     };
 
     res
@@ -179,8 +169,51 @@ const logOut = async (req, res, next) => {
       .status(200)
       .json(new apiResponse(200, {}, "User logged out"));
   } catch (error) {
-    return next(new apiError(500, "LogOut failed"));
+    return next(new apiError(500, "LogOut fail ho gya"));
   }
 };
 
-export { signUp, login, logOut };
+//Update Profile
+const updateProfile = async (req, res, next) => {
+  try {
+    const { profilePic } = req.body;
+    if (!profilePic)
+      return res.status(400).json(new apiError(400, "Profile pic is required"));
+
+    // 1. Find user by email from JWT payload
+    const user = await User.findOne({ email: req.savedUser.email });
+    if (!user) {
+      return next(new apiError(404, "User not found"));
+    }
+
+    // 2. Upload new profile picture to Cloudinary
+    const uploadResponse = await cloudinary.uploader.upload(profilePic);
+
+    // 3. Update user's profilePic
+    user.profilePic = uploadResponse.secure_url; // secure_url is https link to your image u uploaded
+    await user.save();
+    
+    //Returning only insensitive data
+    const safeUser = {
+      _id: user._id,
+      fullName: user.fullName,
+      email: user.email,
+      profilePic: user.profilePic,
+    };
+
+    return res
+      .status(200)
+      .json(new apiResponse(200, safeUser, "Profile uploaded successfully"));
+  } catch (error) {
+    next(new apiError(500, "Internal Server Error"));
+  }
+};
+
+export {
+  signUp,
+  login,
+  logOut,
+  updateProfile,
+  generateTokens,
+  setTokenCookies,
+};
