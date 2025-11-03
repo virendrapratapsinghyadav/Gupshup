@@ -54,45 +54,49 @@ const signUp = async (req, res, next) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const newUser = new User({
+    const user = new User({
       fullName,
       email: normalizedEmail,
       password: hashedPassword,
     });
 
-    const savedUser = await newUser.save();
+    await user.save();
 
     // Generate tokens
     const tokens = generateTokens({
-      email: savedUser.email,
-      fullName: savedUser.fullName,
+      id: user._id,
+      email: user.email,
+      fullName: user.fullName,
     });
 
     // Save refresh token in DB
-    savedUser.refreshToken = tokens.refreshToken;
-    await savedUser.save();
+    user.refreshToken = tokens.refreshToken;
+    await user.save();
 
     // Set cookies
     setTokenCookies(res, tokens.accessToken, tokens.refreshToken);
 
-    try {
-      await sendWelcomeEmail(
-        savedUser.email,
-        savedUser.fullName,
-        ENV.CLIENT_URL
-      );
-    } catch (error) {
-      throw new apiError(500, "failed to send email");
-    }
+
+    //Sending Emails
+    // try {
+    //   await sendWelcomeEmail(
+    //     user._id,
+    //     user.email,
+    //     user.fullName,
+    //     ENV.CLIENT_URL
+    //   );
+    // } catch (error) {
+    //   throw new apiError(500, "failed to send email");
+    // }
 
     return res.status(201).send(
       new apiResponse(
         201,
         {
           user: {
-            id: savedUser._id,
-            fullName: savedUser.fullName,
-            email: savedUser.email,
+            id: user._id,
+            fullName: user.fullName,
+            email: user.email,
           },
         },
         "Signup Successfully"
@@ -124,6 +128,7 @@ const login = async (req, res, next) => {
 
     // Generate tokens
     const tokens = generateTokens({
+      id: user._id,
       email: user.email,
       fullName: user.fullName,
     });
@@ -181,7 +186,7 @@ const updateProfile = async (req, res, next) => {
       return res.status(400).json(new apiError(400, "Profile pic is required"));
 
     // 1. Find user by email from JWT payload
-    const user = await User.findOne({ email: req.savedUser.email });
+    const user = await User.findById(req.user.id);
     if (!user) {
       return next(new apiError(404, "User not found"));
     }

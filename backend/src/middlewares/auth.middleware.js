@@ -16,7 +16,7 @@ export const protectedRoute = async (req, res, next) => {
     // 1. Verify Access Token first
     try {
       const decoded = jwt.verify(accessToken, ENV.ACCESS_TOKEN_SECRET);
-      req.savedUser = decoded;
+      req.user = decoded;
       return next();
     } catch (error) {
       // Access token might just be expired
@@ -27,7 +27,7 @@ export const protectedRoute = async (req, res, next) => {
 
     // 2. Access token expired → verify Refresh Token
     const decodedRefresh = jwt.verify(refreshToken, ENV.REFRESH_TOKEN_SECRET);
-    const user = await User.findOne({ email: decodedRefresh.email });
+    const user = await User.findById(decodedRefresh.id);
 
     if (!user || user.refreshToken !== refreshToken) {
       return next(new apiError(401, "Invalid refresh token"));
@@ -35,6 +35,7 @@ export const protectedRoute = async (req, res, next) => {
 
     // 3. Generate a new access token
     const { accessToken: newAccessToken } = generateTokens({
+      id: user._id,
       email: user.email,
       fullName: user.fullName,
     });
@@ -43,7 +44,7 @@ export const protectedRoute = async (req, res, next) => {
     setTokenCookies(res, newAccessToken, refreshToken);
 
     // 5. Attach user to request and continue
-    req.savedUser = decodedRefresh;
+    req.user = user;
     next();
   } catch (error) {
     return next(new apiError(401, error.message || "User not authenticated"));

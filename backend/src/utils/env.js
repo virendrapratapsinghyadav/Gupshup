@@ -25,7 +25,8 @@ CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY,
 CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET,
 
 //RateLimiting
-
+ARCJET_KEY: process.env.ARCJET_KEY,
+ARCJET_ENV: process.env.ARCJET_ENV,
 
 //Server Environment
 NODE_ENV: process.env.NODE_ENV,
