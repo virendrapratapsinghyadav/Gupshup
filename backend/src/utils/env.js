@@ -2,12 +2,15 @@ import dotenv from 'dotenv'
 dotenv.config();
 
 const ENV = {
+
+//URL
+CLIENT_URL: process.env.CLIENT_URL,    
     
 //ServerPort
 PORT: process.env.PORT,
 
 //Database
-MONGODBURL:  process.env.MONGODBURL,
+MONGODBURL: process.env.MONGODBURL,
 
 //Tokens
 REFRESH_TOKEN_SECRET: process.env.REFRESH_TOKEN_SECRET,

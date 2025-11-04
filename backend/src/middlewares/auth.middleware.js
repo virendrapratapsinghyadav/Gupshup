@@ -6,8 +6,7 @@ import { generateTokens, setTokenCookies } from "../controllers/auth.controller.
 
 export const protectedRoute = async (req, res, next) => {
   try {
-    const accessToken = req.cookies.accessToken;
-    const refreshToken = req.cookies.refreshToken;
+    const { accessToken, refreshToken } = req.cookies;
 
     if (!accessToken && !refreshToken) {
       return next(new apiError(401, "Unauthorized request"));
@@ -23,6 +22,10 @@ export const protectedRoute = async (req, res, next) => {
       if (error.name !== "TokenExpiredError") {
         return next(new apiError(401, "Invalid access token"));
       }
+    }
+
+    if (!refreshToken) {
+      return next(new apiError(401, "No refresh token, login again"));
     }
 
     // 2. Access token expired → verify Refresh Token
@@ -44,7 +47,12 @@ export const protectedRoute = async (req, res, next) => {
     setTokenCookies(res, newAccessToken, refreshToken);
 
     // 5. Attach user to request and continue
-    req.user = user;
+    req.user =  {
+      id: user._id,
+      email: user.email,
+      fullName: user.fullName,
+    };
+    
     next();
   } catch (error) {
     return next(new apiError(401, error.message || "User not authenticated"));

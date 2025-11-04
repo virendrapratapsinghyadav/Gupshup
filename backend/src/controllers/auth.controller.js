@@ -23,13 +23,13 @@ const setTokenCookies = (res, accessToken, refreshToken) => {
   res.cookie("accessToken", accessToken, {
     httpOnly: true,
     secure: ENV.NODE_ENV === "development" ? false : true,
-    sameSite: "Strict",
+    sameSite: ENV.NODE_ENV === "development" ? "lax" : "Strict",
     maxAge: 15 * 60 * 1000,
   });
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true, //Prevents XSS attacks: cross-site scripting
     secure: ENV.NODE_ENV === "development" ? false : true,
-    sameSite: "Strict", //Prevent CSRF attacks
+    sameSite: ENV.NODE_ENV === "development" ? "lax" : "Strict", //Prevent CSRF attacks
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 };
@@ -164,7 +164,7 @@ const logOut = async (req, res, next) => {
     const options = {
       httpOnly: true,
       secure: ENV.NODE_ENV === "development" ? false : true,
-      sameSite: "strict",
+      sameSite: ENV.NODE_ENV === "development" ? "lax" : "Strict",
       maxAge: 0,
     };
 
