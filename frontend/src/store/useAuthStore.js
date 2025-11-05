@@ -16,7 +16,8 @@ export const useAuthStore = create((set) => ({
       const res = await axiosInstance.get("/auth/check", {
         withCredentials: true, // <-- important
       });
-      set({ authUser: res.data });
+      console.log(res.data);
+      set({ authUser: res.data.data });
     } catch (error) {
       console.log("Error in authCheck:", error);
       set({ authUser: null });
@@ -29,7 +30,7 @@ export const useAuthStore = create((set) => ({
     set({ isSignInUp: true });
     try {
       const res = await axiosInstance.post("/auth/signup", data);
-      set({ authUser: res?.data }); // optional chaining prevents crash
+      set({ authUser: res.data.data }); // optional chaining prevents crash
       toast.success("Account created successfully!");
     } catch (error) {
       console.error(error); // log the full error
@@ -43,7 +44,7 @@ export const useAuthStore = create((set) => ({
     set({isLoggingIn: true});
     try {
         const res = await axiosInstance.post("/auth/login", data);
-        set({ authUser: res?.data });
+        set({ authUser: res.data.data });
         toast.success("Logged in successfully");
     } catch (error) {
         console.error(error);
@@ -66,4 +67,29 @@ export const useAuthStore = create((set) => ({
       set({ isLoggingOut: false });
     }
   },
+
+  updateProfile: async (data) => {
+  try {
+    // Send PUT request to update profile
+    const res = await axiosInstance.put('/auth/update-profile', data);
+
+    // Update the state with the new user data
+    if (res?.data?.data) {
+      set({ authUser: res.data.data });
+      toast.success("Profile Updated");
+    } else {
+      toast.warning("Profile updated, but no data returned");
+    }
+  } catch (error) {
+    // Safely handle errors
+    const errorMsg =
+      error?.response?.data?.message || error?.message || "Failed to update profile";
+    toast.error(errorMsg);
+    console.error("Update Profile Error:", error);
+  }
+},
+
+
+
+
 }));

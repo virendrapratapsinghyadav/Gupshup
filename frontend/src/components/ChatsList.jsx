@@ -1,9 +1,38 @@
-import React from 'react'
+import React, { useEffect } from 'react'
+import { useChatStore } from '../store/useChatStore';
+import UsersLoadingSkeleton from '../components/UsersLoadingSkeleton.jsx';
+import NoChatsFound from '../components/NoChatsFound.jsx';
+import { useAuthStore } from '../store/useAuthStore';
 
 const ChatsList = () => {
+
+  const { chats, getMyChatPartners, isUserLoading, setSelectedUser } = useChatStore();
+
+  useEffect(()=>{
+    getMyChatPartners();
+  },[getMyChatPartners]);
+
+  if (isUserLoading) return <UsersLoadingSkeleton />;
+  if (chats.length === 0) return <NoChatsFound />;
+
   return (
-    <div className='bg-amber-700 text-center h-full'>
-      chatlist
+    <div>
+       {chats.map((chat) => (
+        <div
+          key={chat._id}
+          className="bg-cyan-500/10 m-1 p-4 rounded-lg cursor-pointer hover:bg-cyan-500/20 transition-colors"
+          onClick={() => setSelectedUser(chat)}
+        >
+          <div className="flex items-center gap-3">
+            <div className={`avatar online`}>
+              <div className="size-12 rounded-full">
+                <img src={chat.profilePic || "/avatar.png"} alt={chat.fullName} />
+              </div>
+            </div>
+            <h4 className="text-slate-200 font-medium truncate">{chat.fullName}</h4>
+          </div>
+        </div>
+      ))}
     </div>
   )
 }
