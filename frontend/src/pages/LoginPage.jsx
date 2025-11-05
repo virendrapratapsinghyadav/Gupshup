@@ -1,5 +1,3 @@
-
-import react from "react";
 import signup from "../../public/signup.png";
 import { useState } from "react";
 import BorderAnimatedContainer from "../components/BorderAnimatedContainer.jsx";
@@ -85,7 +83,7 @@ function LoginPage() {
                     {isLoggingIn ? (
                       <LoaderIcon className="w-full h-5 animate-spin text-center" />
                     ) : (
-                      "Sign In"
+                      "Log In"
                     )}
                   </button>
                 </form>
