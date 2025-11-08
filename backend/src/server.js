@@ -39,9 +39,16 @@ app.get('/', (req, res) => {
 // Database connection and server start
 connectDB()
   .then(() => {
-    app.listen(PORT, () => {
-      console.log(`Server is running on port http://localhost:${PORT}`);
-    });
+   app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+}).on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`Port ${PORT} is already in use`);
+  } else {
+    console.error(err);
+  }
+});
+
   })
   .catch((err) => {
     console.error('Failed to connect DB:', err);
