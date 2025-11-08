@@ -93,12 +93,11 @@ const signUp = async (req, res, next) => {
       new apiResponse(
         201,
         {
-          user: {
             id: user._id,
             fullName: user.fullName,
             email: user.email,
             profilePic: user.profilePic || null,
-          },
+
         },
         "Signup Successfully"
       )
@@ -145,12 +144,11 @@ const login = async (req, res, next) => {
       new apiResponse(
         200,
         {
-          user: {
+
             id: user._id,
             fullName: user.fullName,
             email: user.email,
             profilePic: user.profilePic || null,
-          },
         },
         "Logged in successfully"
       )

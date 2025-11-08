@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { useAuthStore } from '../store/useAuthStore.js';
 import { useChatStore } from '../store/useChatStore';
 import MessageInput from './MessageInput.jsx';
@@ -10,13 +10,25 @@ const ChatContainer = () => {
 
   const{ messages, selectedUser, getMessagesByUserId, isMessageLoading } = useChatStore();
   const { authUser } = useAuthStore();
+  const messageEndRef = useRef(null);
 
-  useEffect(()=>{
-    getMessagesByUserId(selectedUser._id)
-  },[selectedUser, getMessagesByUserId])
+useEffect(() => {
+  if (selectedUser?._id) {
+    getMessagesByUserId(selectedUser._id);
+  }
+}, [selectedUser, getMessagesByUserId]);
+
+
+//So that on every message it scroll autoMatically 
+useEffect(()=>{
+  if(messageEndRef.current){
+    messageEndRef.current.scrollIntoView({ behaviour: "smooth"});
+  }
+})
+
 
   return (
-    <div>
+    <div className='flex flex-col h-full'>
       <ChatHeader/>
 
       
@@ -26,11 +38,11 @@ const ChatContainer = () => {
             {messages.map((msg) => (
               <div
                 key={msg._id}
-                className={`chat ${msg.senderId === authUser._id ? "chat-end" : "chat-start"}`}
+                className={`chat ${msg.senderId === authUser.id ? "chat-end" : "chat-start"}`}
               >
                 <div
                   className={`chat-bubble relative ${
-                    msg.senderId === authUser._id
+                    msg.senderId === authUser.id
                       ? "bg-cyan-600 text-white"
                       : "bg-slate-800 text-slate-200"
                   }`}
@@ -49,7 +61,7 @@ const ChatContainer = () => {
               </div>
             ))}
             {/* 👇 scroll target */}
-            {/* <div ref={messageEndRef} /> */}
+            <div ref={messageEndRef} />
           </div>
         ) : isMessageLoading ? (
           <MessagesLoadingSkeleton />
