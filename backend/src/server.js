@@ -6,8 +6,9 @@ import path from 'path';
 import authRoutes from './routes/auth.route.js';
 import messageRoutes from './routes/message.route.js';
 import { connectDB } from './utils/db.js';
+import { app, server } from './utils/socket.js';
 
-const app = express();
+
 const PORT = ENV.PORT || 8000;
 
 // Public middlewares
@@ -39,8 +40,8 @@ app.get('/', (req, res) => {
 // Database connection and server start
 connectDB()
   .then(() => {
-   app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+   server.listen(PORT, () => {
+  console.log(`Server running on port: http://localhost:${PORT}`);
 }).on('error', (err) => {
   if (err.code === 'EADDRINUSE') {
     console.error(`Port ${PORT} is already in use`);
