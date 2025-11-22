@@ -10,7 +10,7 @@ const ContactList = () => {
 
   useEffect(()=>{
     getAllContacts();
-  },[getAllContacts ,selectedUser]);
+  },[getAllContacts]);
 
 
   if(isUsersLoading) return <UserLoadingSkeleton/>;
