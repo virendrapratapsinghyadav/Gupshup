@@ -27,10 +27,6 @@ app.use(cookieParser({ limit: "10mb" }));
 app.use("/api/auth", authRoutes);
 app.use("/api/message", messageRoutes);
 
-// app.get("/", (req, res) => {
-//   res.send("First Api is here...");
-// });
-
 //Deploy
 if (ENV.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "../frontend/dist")));
